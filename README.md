@@ -62,10 +62,10 @@ The GitHub Actions workflow also runs type checking and tests on commits and pul
 3. **Explicit uncertainty.** Low completeness or consistency reduces the indicator rather than being treated as absence of risk.
 4. **Small and testable.** Node's built-in test runner covers expected outputs, missing evidence, invalid inputs, and boundary behavior.
 
-## Scope and limitations
+## About this demonstration
 
-This is a **synthetic educational example**, not a validated production confidence model. The sample does not derive or calibrate input scores, authenticate provenance, detect contradictions directly, evaluate fairness, or implement authorization, auditing, privacy controls, or a complete human-review workflow. It only returns a review recommendation flag. An operational implementation needs domain-specific evidence collection, expert validation, monitoring, security, testing, and enforceable policy controls.
+This is a simplified demonstration of a type of signal evaluation explored in **[AdaptiHire.ai](https://adaptihire.ai)**, a hiring decision intelligence R&D product under development by **Jasleen Kals**.
 
-## Provenance
+The example illustrates a broader design methodology: intelligence systems interpret different signals, make uncertainty visible, and surface findings for **human-in-the-loop review and decision-making**. That approach can be adapted across domains where evidence quality and decision accountability matter.
 
-Independently written for public technical demonstration. It contains **no AdaptiHire production code, proprietary prompts, customer data, internal evaluations, or scoring algorithms**.
+This repository contains one illustrative component, **not the complete AdaptiHire system or its production methodology**. It uses synthetic inputs and example thresholds; it does not implement an end-to-end intelligence or human-approval workflow, and its scores should not be treated as validated probabilities. The code was written independently for this demonstration and does not disclose AdaptiHire's proprietary implementation.
