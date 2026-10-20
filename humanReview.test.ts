@@ -11,6 +11,7 @@ const timestamp = "2026-10-19T12:00:00.000Z";
 test("HIGH reliability never auto-approves", () => {
   const record = openReview("case-1", high);
   assert.equal(record.status, "PENDING_REVIEW");
+  assert.equal(high.signalReviewRecommended, false); // Independent policy still requires human decision.
   assert.equal(record.decisions.length, 0);
 });
 
