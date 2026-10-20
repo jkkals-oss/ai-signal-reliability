@@ -1,0 +1,15 @@
+{
+  "name": "ai-signal-reliability",
+  "version": "1.0.0",
+  "private": true,
+  "description": "An independent educational TypeScript example of evidence reliability and review routing",
+  "scripts": {
+    "test": "tsx --test confidence.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0"
+  }
+}
