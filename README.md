@@ -21,13 +21,13 @@ My approach to building intelligent products follows four principles:
 
 This philosophy informs my work on AdaptiHire.ai and the broader challenge of designing intelligent enterprise products.
 
-The code below demonstrates a narrow part of that thinking: a transparent calculation that flags when additional human review may be warranted. It does not implement AI interpretation, human approval, or decision execution.
+The code below demonstrates two narrow parts of that thinking: a transparent reliability calculation and a separate, human-attributed review decision flow. It does not implement AI interpretation or real-world authorization and execution.
 
 ## Why this exists
 
 AI models can generate confident interpretations even when the information supporting them is incomplete or contradictory. Decision-oriented products need explicit, testable boundaries between **interpreting evidence** and **authorizing action**.
 
-This example implements one deterministic **reliability-checking rule**. It does **not** use an LLM, establish whether the input evidence is true, route a case to a reviewer, or make a business decision.
+This example implements a deterministic **reliability-checking rule** and a separate **human-review state machine**. It does **not** use an LLM, establish whether input evidence is true, authenticate reviewers, or execute real-world business decisions.
 
 ## The design
 
@@ -37,7 +37,7 @@ The function accepts three independently supplied, normalized values between 0 a
 - **Completeness** — an illustrative measure of required information available
 - **Consistency** — an illustrative measure of agreement among evidence
 
-It multiplies them into a composite *indicator* and applies illustrative thresholds to return a review **flag**—not to trigger an approval workflow:
+It multiplies them into a composite *indicator* and applies illustrative thresholds to return a review **flag**. The separate human-review example requires an explicitly recorded reviewer decision regardless of the reliability category:
 
 | Indicator | Status | Demo review flag |
 | --- | --- | --- |
@@ -62,6 +62,45 @@ const result = evaluateReliability({
 // { score: 0.567, status: "REVIEW", requiresHumanReview: true }
 ```
 
+## Human-in-the-loop demonstration
+
+The separate `humanReview.ts` module models a small in-memory case workflow:
+
+```text
+Evidence indicator (HIGH / REVIEW / INSUFFICIENT)
+   ↓
+Case opened → PENDING_REVIEW
+   ↓
+Authorized reviewer records a rationale
+   ├── APPROVED → CLOSED
+   ├── REJECTED → CLOSED
+   └── MORE_EVIDENCE → AWAITING_EVIDENCE
+                                  ↓
+                       Additional evidence submitted
+                                  ↓
+                             PENDING_REVIEW
+```
+
+For example:
+
+```typescript
+import { openReview, recordHumanDecision } from "./humanReview";
+
+const review = openReview("demo-case", result);
+const reviewed = recordHumanDecision(
+  review,
+  { id: "example-reviewer", permissions: ["review:decide"] },
+  "MORE_EVIDENCE",
+  "Supporting source record is missing",
+  "2026-10-19T12:00:00.000Z",
+);
+// reviewed.status === "AWAITING_EVIDENCE"
+```
+
+A `HIGH` indicator **never automatically approves a case**. A reviewer can also reject a case with high reliability based on other information. The sample records reviewer ID, decision, reason, and timestamp, and rejects unauthorized or invalid state transitions.
+
+This is **illustrative authorization using supplied reviewer attributes**, not authenticated access control. Records are in memory, not a durable audit system. A production deployment would need verified identity, server-side permissions, persistence, and concurrency controls.
+
 ## Run locally
 
 Requires Node.js 22 or newer.
@@ -79,12 +118,13 @@ The GitHub Actions workflow is configured to run type checking and tests on comm
 1. **Deterministic gate, not LLM authority.** A typed function evaluates predefined inputs; it cannot independently authorize downstream actions.
 2. **Fail on malformed inputs.** Non-finite and out-of-range values raise an explicit error instead of silently producing an apparently valid answer.
 3. **Explicit uncertainty.** Low completeness or consistency reduces the indicator rather than being treated as absence of risk.
-4. **Small and testable.** Node's built-in test runner covers expected outputs, missing evidence, invalid inputs, and boundary behavior.
+4. **Human judgment can override the signal.** The review model records approval, rejection, or a request for further evidence with attribution and a mandatory rationale; no reliability category auto-approves.
+5. **Small and testable.** Node's built-in test runner covers reliability boundaries, invalid inputs, authorization checks, decision history, and invalid state transitions.
 
 ## Connection to AdaptiHire and reuse across domains
 
 This is a simplified demonstration of a type of signal evaluation explored in **[AdaptiHire.ai](https://adaptihire.ai)**, a hiring decision intelligence R&D product under development by **Jasleen Kals**.
 
-The broader methodology is to separate **interpreted signals**, **evaluation of uncertainty**, **explicit decision authority**, and **human review where needed**. That separation is relevant beyond hiring—to enterprise operations, payments, and other evidence-driven workflows. The example here only covers the reliability-evaluation slice; the other layers are design context, not features implemented in this repository.
+The broader methodology is to separate **interpreted signals**, **evaluation of uncertainty**, **explicit decision authority**, and **human review where needed**. That separation is relevant beyond hiring—to enterprise operations, payments, and other evidence-driven workflows. This example covers reliability evaluation and an illustrative human decision-recording workflow; intelligence interpretation, operational approvals, and the other layers remain outside its scope.
 
-This is **one illustrative artifact, not the complete AdaptiHire system or its production methodology**. Inputs and thresholds are synthetic; outputs are not validated probabilities. The code is independently written for demonstration and does not disclose AdaptiHire's proprietary implementation.
+This is **one illustrative artifact, not the complete AdaptiHire system or its production methodology**. Inputs and thresholds are synthetic; outputs are not validated probabilities. Human reviewer permissions are supplied rather than authenticated, and review records are not persisted. The code is independently written for demonstration and does not disclose AdaptiHire's proprietary implementation.
