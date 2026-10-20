@@ -4,7 +4,7 @@
   "private": true,
   "description": "An independent educational TypeScript example of evidence reliability and review routing",
   "scripts": {
-    "test": "tsx --test confidence.test.ts",
+    "test": "tsx --test *.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
