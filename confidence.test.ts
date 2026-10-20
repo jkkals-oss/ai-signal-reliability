@@ -8,7 +8,7 @@ test("strong evidence receives HIGH indicator without triggering this review rul
   });
   assert.equal(result.status, "HIGH");
   assert.equal(result.score, 0.857);
-  assert.equal(result.requiresHumanReview, false);
+  assert.equal(result.signalReviewRecommended, false);
 });
 
 test("partially complete evidence requires review", () => {
@@ -16,7 +16,7 @@ test("partially complete evidence requires review", () => {
     quality: 0.9, completeness: 0.7, consistency: 0.9,
   });
   assert.equal(result.status, "REVIEW");
-  assert.equal(result.requiresHumanReview, true);
+  assert.equal(result.signalReviewRecommended, true);
 });
 
 test("missing evidence yields insufficient reliability", () => {
@@ -25,7 +25,7 @@ test("missing evidence yields insufficient reliability", () => {
   });
   assert.equal(result.score, 0);
   assert.equal(result.status, "INSUFFICIENT");
-  assert.equal(result.requiresHumanReview, true);
+  assert.equal(result.signalReviewRecommended, true);
 });
 
 test("contradictory evidence represented by zero consistency is insufficient", () => {
