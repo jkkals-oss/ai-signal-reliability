@@ -2,7 +2,7 @@
 
 [![TypeScript Validation](https://github.com/jkkals-oss/ai-signal-reliability/actions/workflows/tests.yml/badge.svg)](https://github.com/jkkals-oss/ai-signal-reliability/actions/workflows/tests.yml)
 
-An independent, lightweight TypeScript reference implementation showing how AI-enabled enterprise workflows can **make uncertainty explicit and route low-reliability evidence to human review**.
+A small TypeScript demonstration of how evidence reliability can be made explicit **before a human or a governed workflow makes a decision**. Inspired by R&D on [AdaptiHire.ai](https://adaptihire.ai), developed by Jasleen Kals; the code here is independently written and domain-neutral.
 
 ## Decision Philosophy in the Age of AI
 
@@ -21,13 +21,13 @@ My approach to building intelligent products follows four principles:
 
 This philosophy informs my work on AdaptiHire.ai and the broader challenge of designing intelligent enterprise products.
 
-The code below demonstrates one small part of that thinking: how a system can evaluate evidence reliability and identify when additional human review may be warranted.
+The code below demonstrates a narrow part of that thinking: a transparent calculation that flags when additional human review may be warranted. It does not implement AI interpretation, human approval, or decision execution.
 
 ## Why this exists
 
 AI models can generate confident interpretations even when the information supporting them is incomplete or contradictory. Decision-oriented products need explicit, testable boundaries between **interpreting evidence** and **authorizing action**.
 
-This demo illustrates one deterministic screening rule. It does **not** use an LLM, validate the truth of its inputs, or make actual business decisions.
+This example implements one deterministic **reliability-checking rule**. It does **not** use an LLM, establish whether the input evidence is true, route a case to a reviewer, or make a business decision.
 
 ## The design
 
@@ -37,7 +37,7 @@ The function accepts three independently supplied, normalized values between 0 a
 - **Completeness** — an illustrative measure of required information available
 - **Consistency** — an illustrative measure of agreement among evidence
 
-It multiplies them into a composite *indicator* and applies deliberately illustrative thresholds:
+It multiplies them into a composite *indicator* and applies illustrative thresholds to return a review **flag**—not to trigger an approval workflow:
 
 | Indicator | Status | Demo review flag |
 | --- | --- | --- |
@@ -72,7 +72,7 @@ npm run typecheck
 npm test
 ```
 
-The GitHub Actions workflow also runs type checking and tests on commits and pull requests.
+The GitHub Actions workflow is configured to run type checking and tests on commits and pull requests. Check the Actions tab for the latest execution result.
 
 ## Design decisions and tradeoffs
 
@@ -81,10 +81,10 @@ The GitHub Actions workflow also runs type checking and tests on commits and pul
 3. **Explicit uncertainty.** Low completeness or consistency reduces the indicator rather than being treated as absence of risk.
 4. **Small and testable.** Node's built-in test runner covers expected outputs, missing evidence, invalid inputs, and boundary behavior.
 
-## About this demonstration
+## Connection to AdaptiHire and reuse across domains
 
 This is a simplified demonstration of a type of signal evaluation explored in **[AdaptiHire.ai](https://adaptihire.ai)**, a hiring decision intelligence R&D product under development by **Jasleen Kals**.
 
-The example illustrates a broader design methodology: intelligence systems interpret different signals, make uncertainty visible, and surface findings for **human-in-the-loop review and decision-making**. That approach can be adapted across domains where evidence quality and decision accountability matter.
+The broader methodology is to separate **interpreted signals**, **evaluation of uncertainty**, **explicit decision authority**, and **human review where needed**. That separation is relevant beyond hiring—to enterprise operations, payments, and other evidence-driven workflows. The example here only covers the reliability-evaluation slice; the other layers are design context, not features implemented in this repository.
 
-This repository contains one illustrative component, **not the complete AdaptiHire system or its production methodology**. It uses synthetic inputs and example thresholds; it does not implement an end-to-end intelligence or human-approval workflow, and its scores should not be treated as validated probabilities. The code was written independently for this demonstration and does not disclose AdaptiHire's proprietary implementation.
+This is **one illustrative artifact, not the complete AdaptiHire system or its production methodology**. Inputs and thresholds are synthetic; outputs are not validated probabilities. The code is independently written for demonstration and does not disclose AdaptiHire's proprietary implementation.
