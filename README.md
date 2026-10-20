@@ -23,6 +23,14 @@ This philosophy informs my work on AdaptiHire.ai and the broader challenge of de
 
 The code below demonstrates two narrow parts of that thinking: a transparent reliability calculation and a separate, human-attributed review decision flow. It does not implement AI interpretation or real-world authorization and execution.
 
+## The product problem
+
+As AI systems take on more interpretation and decision-support work, product teams face a tradeoff: **automate too aggressively and uncertain evidence can become consequential action; require human approval for every low-risk step and the operating cost rises.** The product challenge is to improve decision quality without adding unnecessary friction.
+
+That requires two distinct controls: a **signal-level recommendation** about evidence reliability and a **policy-level decision** about who is permitted to act. A strong signal does not override mandatory approval requirements.
+
+In a real product, I would evaluate this tradeoff through decision quality, exception rates, review time, cost per decision, and traceability. These are proposed success measures, **not outcomes claimed for this demonstration**.
+
 ## Why this exists
 
 AI models can generate confident interpretations even when the information supporting them is incomplete or contradictory. Decision-oriented products need explicit, testable boundaries between **interpreting evidence** and **authorizing action**.
@@ -37,9 +45,9 @@ The function accepts three independently supplied, normalized values between 0 a
 - **Completeness** — an illustrative measure of required information available
 - **Consistency** — an illustrative measure of agreement among evidence
 
-It multiplies them into a composite *indicator* and applies illustrative thresholds to return a review **flag**. The separate human-review example requires an explicitly recorded reviewer decision regardless of the reliability category:
+It multiplies them into a composite *indicator* and applies illustrative thresholds to return a review **flag**. The output flag is advisory. The separate human-review example illustrates a policy that requires an explicitly recorded human decision regardless of the reliability category:
 
-| Indicator | Status | Demo review flag |
+| Indicator | Status | Signal recommends additional review |
 | --- | --- | --- |
 | >= 0.8 | HIGH | false |
 | >= 0.5 and < 0.8 | REVIEW | true |
@@ -59,12 +67,12 @@ const result = evaluateReliability({
   completeness: 0.7,
   consistency: 0.9,
 });
-// { score: 0.567, status: "REVIEW", requiresHumanReview: true }
+// { score: 0.567, status: "REVIEW", signalReviewRecommended: true }
 ```
 
 ## Human-in-the-loop demonstration
 
-The separate `humanReview.ts` module models a small in-memory case workflow:
+The separate `humanReview.ts` module models a small in-memory case workflow where **policy requires human approval of every case**, even if the signal-level check does not recommend additional review:
 
 ```text
 Evidence indicator (HIGH / REVIEW / INSUFFICIENT)
@@ -97,7 +105,7 @@ const reviewed = recordHumanDecision(
 // reviewed.status === "AWAITING_EVIDENCE"
 ```
 
-A `HIGH` indicator **never automatically approves a case**. A reviewer can also reject a case with high reliability based on other information. The sample records reviewer ID, decision, reason, and timestamp, and rejects unauthorized or invalid state transitions.
+A `HIGH` indicator **never automatically approves a case**. The advisory `signalReviewRecommended` field is not an authorization policy: `openReview` requires human decision-making for every opened case. A reviewer can also reject a case with high reliability based on other information. The sample records reviewer ID, decision, reason, and timestamp, and rejects unauthorized or invalid state transitions.
 
 This is **illustrative authorization using supplied reviewer attributes**, not authenticated access control. Records are in memory, not a durable audit system. A production deployment would need verified identity, server-side permissions, persistence, and concurrency controls.
 
@@ -118,7 +126,7 @@ The GitHub Actions workflow is configured to run type checking and tests on comm
 1. **Deterministic gate, not LLM authority.** A typed function evaluates predefined inputs; it cannot independently authorize downstream actions.
 2. **Fail on malformed inputs.** Non-finite and out-of-range values raise an explicit error instead of silently producing an apparently valid answer.
 3. **Explicit uncertainty.** Low completeness or consistency reduces the indicator rather than being treated as absence of risk.
-4. **Human judgment can override the signal.** The review model records approval, rejection, or a request for further evidence with attribution and a mandatory rationale; no reliability category auto-approves.
+4. **Keep recommendation separate from authority.** `signalReviewRecommended` is advisory; the review process applies an independent human-approval rule. **Human judgment can override the signal.** The review model records approval, rejection, or a request for further evidence with attribution and a mandatory rationale; no reliability category auto-approves.
 5. **Small and testable.** Node's built-in test runner covers reliability boundaries, invalid inputs, authorization checks, decision history, and invalid state transitions.
 
 ## Connection to AdaptiHire and reuse across domains
