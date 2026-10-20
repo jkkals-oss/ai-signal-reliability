@@ -2,6 +2,7 @@
  * Standalone, synthetic illustration of deterministic reliability screening.
  * These inputs are assumed normalized; this code does not validate source truth.
  * Scores are indicators, not probabilities or authorization decisions.
+ * signalReviewRecommended is advisory and distinct from policy-required approval.
  */
 export type EvidenceSignals = Readonly<{
   quality: number;
@@ -12,7 +13,7 @@ export type EvidenceSignals = Readonly<{
 export type ReliabilityResult = Readonly<{
   score: number;
   status: "HIGH" | "REVIEW" | "INSUFFICIENT";
-  requiresHumanReview: boolean;
+  signalReviewRecommended: boolean;
 }>;
 
 export function evaluateReliability(signals: EvidenceSignals): ReliabilityResult {
@@ -31,6 +32,6 @@ export function evaluateReliability(signals: EvidenceSignals): ReliabilityResult
   return {
     score: Math.round(score * 1000) / 1000,
     status,
-    requiresHumanReview: status !== "HIGH",
+    signalReviewRecommended: status !== "HIGH",
   };
 }
