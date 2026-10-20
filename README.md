@@ -31,11 +31,9 @@ That requires two distinct controls: a **signal-level recommendation** about evi
 
 In a real product, I would evaluate this tradeoff through decision quality, exception rates, review time, cost per decision, and traceability. These are proposed success measures, **not outcomes claimed for this demonstration**.
 
-## Why this exists
+## What this implementation demonstrates
 
-AI models can generate confident interpretations even when the information supporting them is incomplete or contradictory. Decision-oriented products need explicit, testable boundaries between **interpreting evidence** and **authorizing action**.
-
-This example implements a deterministic **reliability-checking rule** and a separate **human-review state machine**. It does **not** use an LLM, establish whether input evidence is true, authenticate reviewers, or execute real-world business decisions.
+Two small, independently written TypeScript modules: [`confidence.ts`](confidence.ts), a deterministic evidence-reliability indicator, and [`humanReview.ts`](humanReview.ts), a human-review state machine. The model does **not** generate or verify evidence, authenticate people, persist decisions, or make real-world decisions.
 
 ## The design
 
@@ -57,7 +55,7 @@ The calculation is simple by design: a zero in any dimension drops the result to
 
 **Important:** A `HIGH` result only means this *particular example rule* does not trigger review. It does not authorize payment, hiring, medical, or other consequential decisions. Production policy can require review regardless of this output.
 
-## Example
+## Reliability example
 
 ```typescript
 import { evaluateReliability } from "./confidence";
@@ -79,7 +77,7 @@ Evidence indicator (HIGH / REVIEW / INSUFFICIENT)
    ↓
 Case opened → PENDING_REVIEW
    ↓
-Authorized reviewer records a rationale
+Reviewer with a supplied decision permission records a rationale
    ├── APPROVED → CLOSED
    ├── REJECTED → CLOSED
    └── MORE_EVIDENCE → AWAITING_EVIDENCE
@@ -105,7 +103,7 @@ const reviewed = recordHumanDecision(
 // reviewed.status === "AWAITING_EVIDENCE"
 ```
 
-A `HIGH` indicator **never automatically approves a case**. The advisory `signalReviewRecommended` field is not an authorization policy: `openReview` requires human decision-making for every opened case. A reviewer can also reject a case with high reliability based on other information. The sample records reviewer ID, decision, reason, and timestamp, and rejects unauthorized or invalid state transitions.
+A `HIGH` indicator **never automatically approves a case**. The advisory `signalReviewRecommended` field is not an authorization policy: `openReview` requires human decision-making for every opened case. A reviewer can also reject a case with high reliability based on other information. The sample records reviewer ID, decision, reason, and timestamp, and rejects reviewers lacking the supplied permission as well as invalid state transitions.
 
 This is **illustrative authorization using supplied reviewer attributes**, not authenticated access control. Records are in memory, not a durable audit system. A production deployment would need verified identity, server-side permissions, persistence, and concurrency controls.
 
@@ -126,13 +124,11 @@ The GitHub Actions workflow is configured to run type checking and tests on comm
 1. **Deterministic gate, not LLM authority.** A typed function evaluates predefined inputs; it cannot independently authorize downstream actions.
 2. **Fail on malformed inputs.** Non-finite and out-of-range values raise an explicit error instead of silently producing an apparently valid answer.
 3. **Explicit uncertainty.** Low completeness or consistency reduces the indicator rather than being treated as absence of risk.
-4. **Keep recommendation separate from authority.** `signalReviewRecommended` is advisory; the review process applies an independent human-approval rule. **Human judgment can override the signal.** The review model records approval, rejection, or a request for further evidence with attribution and a mandatory rationale; no reliability category auto-approves.
+4. **Keep recommendation separate from authority.** `signalReviewRecommended` is advisory; the example's independent policy requires a human disposition for every opened case. Humans can approve, reject, or request evidence, with a reason recorded.
 5. **Small and testable.** Node's built-in test runner covers reliability boundaries, invalid inputs, authorization checks, decision history, and invalid state transitions.
 
-## Connection to AdaptiHire and reuse across domains
+## Origin, portability and boundaries
 
-This is a simplified demonstration of a type of signal evaluation explored in **[AdaptiHire.ai](https://adaptihire.ai)**, a hiring decision intelligence R&D product under development by **Jasleen Kals**.
+This illustrative method is inspired by **[AdaptiHire.ai](https://adaptihire.ai)**, a hiring decision intelligence R&D product in development by **Jasleen Kals**. The design principle—separating interpreted signals, uncertainty, policy and human authority—can apply to payments, enterprise operations, or other evidence-driven workflows without transferring hiring-specific logic.
 
-The broader methodology is to separate **interpreted signals**, **evaluation of uncertainty**, **explicit decision authority**, and **human review where needed**. That separation is relevant beyond hiring—to enterprise operations, payments, and other evidence-driven workflows. This example covers reliability evaluation and an illustrative human decision-recording workflow; intelligence interpretation, operational approvals, and the other layers remain outside its scope.
-
-This is **one illustrative artifact, not the complete AdaptiHire system or its production methodology**. Inputs and thresholds are synthetic; outputs are not validated probabilities. Human reviewer permissions are supplied rather than authenticated, and review records are not persisted. The code is independently written for demonstration and does not disclose AdaptiHire's proprietary implementation.
+This is **one synthetic technical artifact, not AdaptiHire's complete system or production methodology**. It includes no AdaptiHire proprietary source code or internal evaluation logic. It does not run an LLM, authenticate reviewers, enforce a production permission model, or durably store decisions. Scores and thresholds are illustrative, not validated probabilities; real deployment would require domain validation and operational controls.
