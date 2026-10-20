@@ -4,6 +4,25 @@
 
 An independent, lightweight TypeScript reference implementation showing how AI-enabled enterprise workflows can **make uncertainty explicit and route low-reliability evidence to human review**.
 
+## Decision Philosophy in the Age of AI
+
+AI is changing how we interpret information, evaluate options, and make decisions. But better intelligence doesn't automatically produce better decisions.
+
+I believe the value of AI lies not simply in automating decisions, but in improving the quality, speed, and consistency of human judgment.
+
+That requires designing systems that distinguish between **what is known, what is inferred, what remains uncertain, and who has the authority to act.**
+
+My approach to building intelligent products follows four principles:
+
+1. **Intelligence informs; authority is designed.** AI can interpret evidence and recommend actions, but decision rights should be explicit.
+2. **Uncertainty is a product signal.** Missing, contradictory, or low-confidence information should be surfaced, not concealed behind a definitive answer.
+3. **Human judgment is part of the architecture.** Human oversight should be embedded into decision workflows, not treated as an exception when automation fails.
+4. **Intelligence must produce measurable value.** The objective isn't more AI. It's better decisions, less operational friction, and improved business outcomes.
+
+This philosophy informs my work on AdaptiHire.ai and the broader challenge of designing intelligent enterprise products.
+
+The code below demonstrates one small part of that thinking: how a system can evaluate evidence reliability and identify when additional human review may be warranted.
+
 ## Why this exists
 
 AI models can generate confident interpretations even when the information supporting them is incomplete or contradictory. Decision-oriented products need explicit, testable boundaries between **interpreting evidence** and **authorizing action**.
